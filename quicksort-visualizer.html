@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"],
+        .algorithm-select {
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .algorithm-picker {
+            position: relative;
+            min-width: 190px;
+            flex: 0 0 210px;
+        }
+
+        .algorithm-picker::before {
+            content: 'Algorithm';
+            position: absolute;
+            left: 18px;
+            top: 8px;
+            z-index: 1;
+            color: #7a7f9a;
+            font-size: 0.65em;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+
+        .algorithm-picker::after {
+            content: '';
+            position: absolute;
+            right: 17px;
+            top: 50%;
+            width: 9px;
+            height: 9px;
+            border-right: 2px solid #667eea;
+            border-bottom: 2px solid #667eea;
+            pointer-events: none;
+            transform: translateY(-65%) rotate(45deg);
+            transition: all 0.25s ease;
+        }
+
+        .algorithm-select {
+            width: 100%;
+            min-height: 56px;
+            padding: 24px 46px 8px 18px;
+            color: #2f3349;
+            font-weight: 700;
+            cursor: pointer;
+            appearance: none;
+            background:
+                linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08)),
+                #fff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+
+        input[type="text"]:focus,
+        .algorithm-select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .algorithm-picker:focus-within::after {
+            border-color: #764ba2;
+            transform: translateY(-35%) rotate(225deg);
+        }
+
+        input[type="text"]::placeholder {
+            color: #999;
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            display: block;
+            margin: auto;
+            gap: 10px;
+        }
+
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sort-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            min-width: 120px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .sort-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .sort-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .sort-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .sort-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .clear-btn {
+            background: #f0f0f0;
+            color: #333;
+            padding: 14px 20px;
+        }
+
+        .clear-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* ── Speed Control ── */
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .speed-control label {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .speed-control input[type="range"] {
+            flex: 1;
+            min-width: 100px;
+            accent-color: #667eea;
+            padding: 0;
+            border: none;
+            background: none;
+        }
+
+        .speed-label {
+            font-size: 0.8em;
+            color: #667eea;
+            font-weight: 700;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* ── Visualization Section ── */
+        .visualization-section {
+            background: linear-gradient(135deg, #f5f7ff 0%, #f8f9ff 100%);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .visualization-section.active {
+            display: block;
+        }
+
+        .vis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .vis-title {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .vis-step {
+            font-size: 0.8em;
+            color: #667eea;
+            font-weight: 600;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        #sortCanvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .visualization-legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 0.82em;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        /* ── Messages ── */
+        #messageContainer { margin-top: 4px; }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+            color: white;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            animation: shake 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-message::before {
+            content: '⚠';
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: white;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            animation: pulse 0.5s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .success-message::before {
+            content: '✓';
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ── Results ── */
+        .results-section {
+            margin-top: 20px;
+        }
+
+        .results-section.hidden {
+            display: none;
+        }
+
+        .results-label {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .results-label.success::before {
+            content: '✓';
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .number-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: linear-gradient(135deg, #f5f7ff 0%, #f8f9ff 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            min-height: 60px;
+            align-content: flex-start;
+        }
+
+        .number-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95em;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .number-item:nth-child(1)  { animation-delay: 0.05s; }
+        .number-item:nth-child(2)  { animation-delay: 0.1s; }
+        .number-item:nth-child(3)  { animation-delay: 0.15s; }
+        .number-item:nth-child(4)  { animation-delay: 0.2s; }
+        .number-item:nth-child(5)  { animation-delay: 0.25s; }
+        .number-item:nth-child(6)  { animation-delay: 0.3s; }
+        .number-item:nth-child(7)  { animation-delay: 0.35s; }
+        .number-item:nth-child(8)  { animation-delay: 0.4s; }
+        .number-item:nth-child(9)  { animation-delay: 0.45s; }
+        .number-item:nth-child(10) { animation-delay: 0.5s; }
+
+        .info-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #ff9a56;
+            font-size: 0.9em;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .stat {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 25px; }
+            .header h1 { font-size: 2em; }
+            .input-group { flex-direction: column; }
+            input[type="text"], .algorithm-picker { min-width: auto; width: 100%; flex-basis: auto; }
+            .button-group { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>⚡ Sorting Algorithm Visualizer</h1>
+        <p>Watch sorting algorithms in action with step-by-step visualization</p>
+    </div>
+
+    <div class="input-section">
+        <label class="label">Algorithm &amp; Input</label>
+        <div class="input-group">
+            <div class="algorithm-picker">
+                <select id="algorithmSelect" class="algorithm-select" aria-label="Select sorting algorithm">
+                    <option value="quicksort">QuickSort</option>
+                    <option value="mergesort">Merge Sort</option>
+                    <option value="bubblesort">Bubble Sort</option>
+                    <option value="heapsort">Heap Sort</option>
+                </select>
+            </div>
+            <input
+                type="text"
+                id="numberInput"
+                placeholder="e.g., 64,34,25,12,22,11,90"
+                autocomplete="off"
+            >
+            <div class="button-group">
+                <button class="sort-btn" id="sortBtn">Sort</button>
+                <button class="clear-btn" id="clearBtn">Clear</button>
+            </div>
+        </div>
+
+        <!-- Speed slider -->
+        <div class="speed-control">
+            <label for="speedRange">Speed:</label>
+            <input type="range" id="speedRange" min="1" max="10" value="5">
+            <span class="speed-label" id="speedLabel">5x</span>
+        </div>
+    </div>
+
+    <div id="messageContainer"></div>
+
+    <!-- ── Visualization Canvas ── -->
+    <div class="visualization-section" id="visualizationSection">
+        <div class="vis-header">
+            <span class="vis-title">Live Visualization</span>
+            <span class="vis-step" id="visStep">Ready</span>
+        </div>
+        <canvas id="sortCanvas" width="620" height="200"></canvas>
+        <div class="visualization-legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background:#667eea;"></div>
+                <span>Unsorted</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background:#ff6b6b;"></div>
+                <span>Pivot</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background:#ffd43b;"></div>
+                <span>Comparing</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background:#ff9a3c;"></div>
+                <span>Swapping</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background:#51cf66;"></div>
+                <span>Sorted</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Results ── -->
+    <div class="results-section hidden" id="resultsSection">
+        <p class="results-label success">Sorted Result</p>
+        <div class="number-display" id="numberDisplay"></div>
+        <div class="info-box" id="infoBox">
+            <strong>Algorithm: QuickSort</strong>
+            • Time Complexity: O(n log n) average case<br>
+            • Space Complexity: O(log n) for recursion
+        </div>
+        <div class="stats" id="stats"></div>
+    </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Convert slider 1-10 to delay ms (10=fastest≈20ms, 1=slowest≈600ms)
+function getDelay() {
+    const v = parseInt(document.getElementById('speedRange').value, 10);
+    return Math.round(600 / (v * 1.5));
+}
+
+// ═══════════════════════════════════════════════════════════
+// CANVAS RENDERER
+// ═══════════════════════════════════════════════════════════
+
+const canvas  = document.getElementById('sortCanvas');
+const ctx     = canvas.getContext('2d');
+
+const COLORS = {
+    normal:    '#667eea',
+    pivot:     '#ff6b6b',
+    comparing: '#ffd43b',
+    swapping:  '#ff9a3c',
+    sorted:    '#51cf66',
+    text:      '#fff',
+};
+
+function drawBars(arr, highlights = {}) {
+    const W       = canvas.width;
+    const H       = canvas.height;
+    const n       = arr.length;
+    const maxVal  = Math.max(...arr, 1);
+    const padding = 4;
+    const barW    = Math.floor((W - padding * (n + 1)) / n);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // subtle background grid
+    ctx.fillStyle = '#f8f9ff';
+    ctx.fillRect(0, 0, W, H);
+
+    for (let i = 0; i < n; i++) {
+        const x      = padding + i * (barW + padding);
+        const barH   = Math.max(4, Math.floor((arr[i] / maxVal) * (H - 30)));
+        const y      = H - barH - 20;
+
+        // Determine color
+        let color = COLORS.normal;
+        if      (highlights.sorted   && highlights.sorted.includes(i))   color = COLORS.sorted;
+        if      (highlights.comparing && highlights.comparing.includes(i)) color = COLORS.comparing;
+        if      (highlights.swapping  && highlights.swapping.includes(i))  color = COLORS.swapping;
+        if      (highlights.pivot     && highlights.pivot.includes(i))     color = COLORS.pivot;
+
+        // Bar shadow
+        ctx.shadowColor   = 'rgba(0,0,0,0.12)';
+        ctx.shadowBlur    = 4;
+        ctx.shadowOffsetY = 2;
+
+        // Bar
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.roundRect(x, y, barW, barH, [4, 4, 0, 0]);
+        ctx.fill();
+
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur  = 0;
+
+        // Value label (only if bars are wide enough)
+        if (barW >= 18) {
+            ctx.fillStyle  = '#444';
+            ctx.font       = `bold ${Math.min(11, barW - 4)}px Segoe UI`;
+            ctx.textAlign  = 'center';
+            ctx.fillText(arr[i], x + barW / 2, H - 4);
+        }
+    }
+}
+
+function setStepLabel(text) {
+    document.getElementById('visStep').textContent = text;
+}
+
+// ═══════════════════════════════════════════════════════════
+// STEP COLLECTOR — captures every meaningful step
+// ═══════════════════════════════════════════════════════════
+
+// Each step: { arr: [...], highlights: {...}, label: '' }
+let steps    = [];
+let sortedSet = new Set();
+
+function recordStep(arr, highlights, label) {
+    steps.push({
+        arr: [...arr],
+        highlights: {
+            pivot:     highlights.pivot     ? [...highlights.pivot]     : [],
+            comparing: highlights.comparing ? [...highlights.comparing] : [],
+            swapping:  highlights.swapping  ? [...highlights.swapping]  : [],
+            sorted:    [...sortedSet],
+        },
+        label,
+    });
+}
+
+// ═══════════════════════════════════════════════════════════
+// QUICKSORT — step recorder
+// ═══════════════════════════════════════════════════════════
+
+function swap(arr, i, j) {
+    const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+}
+
+function quickSortSteps(arr, low = 0, high = arr.length - 1) {
+    if (low >= high) {
+        if (low === high) sortedSet.add(low);
+        return;
+    }
+
+    const pivot = arr[high];
+    recordStep(arr, { pivot: [high], comparing: [], swapping: [] }, `Pivot = ${pivot} at index ${high}`);
+
+    let i = low - 1;
+
+    for (let j = low; j < high; j++) {
+        recordStep(arr, { pivot: [high], comparing: [j, i + 1] }, `Comparing ${arr[j]} with pivot ${pivot}`);
+
+        if (arr[j] <= pivot) {
+            i++;
+            if (i !== j) {
+                recordStep(arr, { pivot: [high], swapping: [i, j] }, `Swapping ${arr[i]} ↔ ${arr[j]}`);
+                swap(arr, i, j);
+                recordStep(arr, { pivot: [high], swapping: [i, j] }, `Swapped → ${arr[i]}, ${arr[j]}`);
+            }
+        }
+    }
+
+    const pi = i + 1;
+    swap(arr, pi, high);
+    sortedSet.add(pi);
+    recordStep(arr, { pivot: [pi], sorted: [] }, `Pivot ${arr[pi]} placed at index ${pi}`);
+
+    quickSortSteps(arr, low, pi - 1);
+    quickSortSteps(arr, pi + 1, high);
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUBBLE SORT — step recorder
+// ═══════════════════════════════════════════════════════════
+
+function bubbleSortSteps(arr) {
+    const n = arr.length;
+    for (let i = 0; i < n - 1; i++) {
+        let swapped = false;
+        for (let j = 0; j < n - i - 1; j++) {
+            recordStep(arr, { comparing: [j, j + 1] }, `Comparing ${arr[j]} and ${arr[j + 1]}`);
+
+            if (arr[j] > arr[j + 1]) {
+                recordStep(arr, { swapping: [j, j + 1] }, `Swapping ${arr[j]} ↔ ${arr[j + 1]}`);
+                swap(arr, j, j + 1);
+                recordStep(arr, { swapping: [j, j + 1] }, `Swapped → ${arr[j]}, ${arr[j + 1]}`);
+                swapped = true;
+            }
+        }
+        sortedSet.add(n - 1 - i);
+        recordStep(arr, {}, `Pass ${i + 1} complete — ${arr[n - 1 - i]} is in place`);
+        if (!swapped) {
+            for (let k = 0; k < n - 1 - i; k++) sortedSet.add(k);
+            break;
+        }
+    }
+    sortedSet.add(0);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MERGE SORT — step recorder
+// ═══════════════════════════════════════════════════════════
+
+function mergeSortSteps(arr, low = 0, high = arr.length - 1) {
+    if (low >= high) return;
+
+    const mid = Math.floor((low + high) / 2);
+    mergeSortSteps(arr, low, mid);
+    mergeSortSteps(arr, mid + 1, high);
+    mergeStep(arr, low, mid, high);
+}
+
+function mergeStep(arr, low, mid, high) {
+    const left  = arr.slice(low, mid + 1);
+    const right = arr.slice(mid + 1, high + 1);
+
+    recordStep(arr, { comparing: Array.from({length: high - low + 1}, (_, k) => low + k) },
+        `Merging [${low}..${mid}] and [${mid+1}..${high}]`);
+
+    let i = 0, j = 0, k = low;
+
+    while (i < left.length && j < right.length) {
+        recordStep(arr, { comparing: [low + i, mid + 1 + j] },
+            `Comparing ${left[i]} and ${right[j]}`);
+
+        if (left[i] <= right[j]) {
+            arr[k++] = left[i++];
+        } else {
+            arr[k++] = right[j++];
+        }
+        recordStep(arr, { swapping: [k - 1] }, `Placed ${arr[k - 1]} at index ${k - 1}`);
+    }
+
+    while (i < left.length) { arr[k++] = left[i++]; }
+    while (j < right.length) { arr[k++] = right[j++]; }
+
+    for (let x = low; x <= high; x++) sortedSet.add(x);
+    recordStep(arr, {}, `Merged segment [${low}..${high}]`);
+}
+
+// ═══════════════════════════════════════════════════════════
+// ALGORITHM INFO MAP
+// ═══════════════════════════════════════════════════════════
+
+function heapSortSteps(arr) {
+    const n = arr.length;
+
+    for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+        heapify(arr, n, i);
+    }
+
+    for (let end = n - 1; end > 0; end--) {
+        recordStep(arr, { swapping: [0, end] }, `Moving max ${arr[0]} to index ${end}`);
+        swap(arr, 0, end);
+        sortedSet.add(end);
+        recordStep(arr, {}, `${arr[end]} is in sorted position`);
+        heapify(arr, end, 0);
+    }
+
+    sortedSet.add(0);
+}
+
+function heapify(arr, heapSize, root) {
+    let largest = root;
+    const left = 2 * root + 1;
+    const right = 2 * root + 2;
+
+    if (left < heapSize) {
+        recordStep(arr, { comparing: [largest, left] }, `Comparing ${arr[largest]} and ${arr[left]}`);
+        if (arr[left] > arr[largest]) largest = left;
+    }
+
+    if (right < heapSize) {
+        recordStep(arr, { comparing: [largest, right] }, `Comparing ${arr[largest]} and ${arr[right]}`);
+        if (arr[right] > arr[largest]) largest = right;
+    }
+
+    if (largest !== root) {
+        recordStep(arr, { swapping: [root, largest] }, `Swapping ${arr[root]} and ${arr[largest]}`);
+        swap(arr, root, largest);
+        recordStep(arr, { swapping: [root, largest] }, `Heap restored at index ${root}`);
+        heapify(arr, heapSize, largest);
+    }
+}
+
+const ALGO_INFO = {
+    quicksort: {
+        label: 'QuickSort',
+        time: 'O(n log n) average, O(n²) worst',
+        space: 'O(log n) recursion stack',
+    },
+    bubblesort: {
+        label: 'Bubble Sort',
+        time: 'O(n²) average & worst',
+        space: 'O(1) in-place',
+    },
+    mergesort: {
+        label: 'Merge Sort',
+        time: 'O(n log n) always',
+        space: 'O(n) auxiliary array',
+    },
+    heapsort: {
+        label: 'Heap Sort',
+        time: 'O(n log n) always',
+        space: 'O(1) in-place',
+    },
+};
+
+// ═══════════════════════════════════════════════════════════
+// SOUND EFFECTS
+// ═══════════════════════════════════════════════════════════
+
+function playStartSound() {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ac.currentTime;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.frequency.value = 800;
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    osc.start(now); osc.stop(now + 0.1);
+}
+
+function playCompleteSound() {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ac.currentTime;
+    const notes = [{ freq: 523, dur: 0.1 }, { freq: 659, dur: 0.1 }, { freq: 784, dur: 0.2 }];
+    let t = now;
+    notes.forEach(n => {
+        const osc = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.connect(gain); gain.connect(ac.destination);
+        osc.frequency.value = n.freq;
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + n.dur);
+        osc.start(t); osc.stop(t + n.dur);
+        t += n.dur;
+    });
+}
+
+// ═══════════════════════════════════════════════════════════
+// INPUT PARSING
+// ═══════════════════════════════════════════════════════════
+
+function parseInput(str) {
+    const cleaned = str.trim();
+    if (!cleaned) return null;
+
+    const numbers = cleaned
+        .split(/[,\s]+/)
+        .map(n => n.trim())
+        .filter(n => n !== '')
+        .map(n => {
+            const num = Number(n);
+            if (isNaN(num)) throw new Error(`"${n}" is not a valid number`);
+            return num;
+        });
+
+    if (numbers.length === 0) return null;
+    if (numbers.length > 50) throw new Error('Maximum 50 numbers allowed');
+
+    return numbers;
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════
+
+const msgContainer  = document.getElementById('messageContainer');
+const resultsSection = document.getElementById('resultsSection');
+const numberDisplay  = document.getElementById('numberDisplay');
+const statsContainer = document.getElementById('stats');
+const visSection     = document.getElementById('visualizationSection');
+const sortBtn        = document.getElementById('sortBtn');
+const clearBtn       = document.getElementById('clearBtn');
+const input          = document.getElementById('numberInput');
+const algoSelect     = document.getElementById('algorithmSelect');
+const speedRange     = document.getElementById('speedRange');
+const speedLabel     = document.getElementById('speedLabel');
+
+speedRange.addEventListener('input', () => {
+    speedLabel.textContent = speedRange.value + 'x';
+});
+
+function clearMessages() { msgContainer.innerHTML = ''; }
+
+function showError(msg) {
+    clearMessages();
+    const d = document.createElement('div');
+    d.className = 'error-message';
+    d.textContent = msg;
+    msgContainer.appendChild(d);
+    setTimeout(() => d.remove(), 4000);
+}
+
+function showSuccess(msg) {
+    clearMessages();
+    const d = document.createElement('div');
+    d.className = 'success-message';
+    d.textContent = msg;
+    msgContainer.appendChild(d);
+    setTimeout(() => d.remove(), 3500);
+}
+
+function displayResults(sorted, origCount, timeMs) {
+    numberDisplay.innerHTML = sorted.map(n => `<div class="number-item">${n}</div>`).join('');
+
+    const min  = Math.min(...sorted);
+    const max  = Math.max(...sorted);
+    const sum  = sorted.reduce((a, b) => a + b, 0);
+    const avg  = (sum / sorted.length).toFixed(2);
+
+    statsContainer.innerHTML = `
+        <div class="stat"><div class="stat-label">Min Value</div><div class="stat-value">${min}</div></div>
+        <div class="stat"><div class="stat-label">Max Value</div><div class="stat-value">${max}</div></div>
+        <div class="stat"><div class="stat-label">Sum</div><div class="stat-value">${sum}</div></div>
+        <div class="stat"><div class="stat-label">Average</div><div class="stat-value">${avg}</div></div>
+    `;
+
+    const info  = ALGO_INFO[algoSelect.value];
+    const infoBox = document.getElementById('infoBox');
+    infoBox.innerHTML = `
+        <strong>Algorithm: ${info.label}</strong>
+        • Time Complexity: ${info.time}<br>
+        • Space Complexity: ${info.space}
+    `;
+
+    resultsSection.classList.remove('hidden');
+    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAIN SORT HANDLER
+// ═══════════════════════════════════════════════════════════
+
+let animating = false;
+
+async function handleSort() {
+    if (animating) return;
+    clearMessages();
+
+    let numbers;
+    try {
+        const inputStr = input.value;
+        if (!inputStr.trim()) { showError('Please enter at least one number'); return; }
+        numbers = parseInput(inputStr);
+        if (!numbers) { showError('Please enter valid numbers'); return; }
+    } catch (err) {
+        showError(err.message);
+        return;
+    }
+
+    // Reset state
+    steps     = [];
+    sortedSet = new Set();
+    animating = true;
+
+    sortBtn.disabled = true;
+    sortBtn.classList.add('loading');
+    sortBtn.textContent = 'Sorting...';
+
+    try { playStartSound(); } catch (_) {}
+
+    // Show visualization panel
+    visSection.classList.add('active');
+    setStepLabel('Building steps…');
+
+    // Build steps synchronously
+    const workArr = [...numbers];
+    const algo    = algoSelect.value;
+
+    if      (algo === 'quicksort')  quickSortSteps(workArr);
+    else if (algo === 'bubblesort') bubbleSortSteps(workArr);
+    else if (algo === 'mergesort')  mergeSortSteps(workArr);
+    else if (algo === 'heapsort')   heapSortSteps(workArr);
+
+    // Mark all as sorted in final frame
+    const finalSorted = new Set(workArr.map((_, i) => i));
+    steps.push({
+        arr:        [...workArr],
+        highlights: { sorted: [...finalSorted], comparing: [], swapping: [], pivot: [] },
+        label:      'Sorting complete!',
+    });
+
+    // Animate steps
+    const t0 = performance.now();
+
+    for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        drawBars(step.arr, step.highlights);
+        setStepLabel(`Step ${i + 1} / ${steps.length}: ${step.label}`);
+        await sleep(getDelay());
+    }
+
+    const elapsed = (performance.now() - t0).toFixed(1);
+
+    // Final frame — all sorted
+    drawBars(workArr, { sorted: [...workArr.map((_, i) => i)] });
+    setStepLabel(`Done! ${steps.length} steps — ${elapsed}ms`);
+
+    displayResults(workArr, numbers.length, elapsed);
+
+    try { playCompleteSound(); } catch (_) {}
+    showSuccess(`${ALGO_INFO[algo].label} completed ${numbers.length} numbers in ${elapsed}ms`);
+
+    sortBtn.disabled = false;
+    sortBtn.classList.remove('loading');
+    sortBtn.textContent = 'Sort';
+    animating = false;
+}
+
+function handleClear() {
+    if (animating) return;
+    input.value = '';
+    resultsSection.classList.add('hidden');
+    visSection.classList.remove('active');
+    numberDisplay.innerHTML = '';
+    statsContainer.innerHTML = '';
+    clearMessages();
+    steps     = [];
+    sortedSet = new Set();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setStepLabel('Ready');
+    input.focus();
+}
+
+// ═══════════════════════════════════════════════════════════
+// EVENT LISTENERS
+// ═══════════════════════════════════════════════════════════
+
+sortBtn.addEventListener('click', handleSort);
+clearBtn.addEventListener('click', handleClear);
+input.addEventListener('keypress', e => { if (e.key === 'Enter') handleSort(); });
+
+input.focus();
+</script>
+</body>
+</html>
